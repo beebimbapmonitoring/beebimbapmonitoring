@@ -1,8 +1,8 @@
-/* --- THEME VARIABLES --- */
+/* --- VARIABLES --- */
 :root {
     --bg-color: #323437;
-    --glass-bg: rgba(30, 30, 30, 0.8);
-    --main-color: #e2b714;      /* Gold/Yellow */
+    --glass-bg: rgba(30, 30, 30, 0.85);
+    --main-color: #e2b714;      /* Gold */
     --sub-color: #646669;       /* Grey */
     --text-color: #d1d0c5;      /* Off-white */
     --error-color: #ca4754;
@@ -13,7 +13,7 @@
 body.theme-carbon { --bg-color: #313131; --main-color: #f66e0d; --sub-color: #616161; --text-color: #f5e6c8; }
 body.theme-honey { --bg-color: #f2eecb; --glass-bg: rgba(255, 255, 255, 0.85); --main-color: #98781d; --sub-color: #999; --text-color: #444; --overlay-opacity: 0.85; }
 
-/* --- GLOBAL RESET --- */
+/* --- RESET --- */
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto Mono', monospace; }
 
 body {
@@ -23,18 +23,15 @@ body {
     min-height: 100vh;
 }
 
-/* Background Image */
+/* Background */
 .bg-layer {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    /* Bee Hive Texture */
     background: url('https://images.unsplash.com/photo-1596436496464-929315998a10?q=80&w=2000&auto=format&fit=crop') no-repeat center center/cover;
     z-index: -10;
 }
 .bg-layer::after {
     content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background-color: var(--bg-color);
-    opacity: var(--overlay-opacity);
-    transition: 0.3s;
+    background-color: var(--bg-color); opacity: var(--overlay-opacity); transition: 0.3s;
 }
 
 /* Utils */
@@ -43,16 +40,18 @@ body {
 .highlight { color: var(--main-color); }
 .error-text { color: var(--error-color); font-size: 0.8rem; margin-top: 10px; }
 
-/* --- LOGIN CARD (CENTERED & CLEAN) --- */
-#login { position: relative; z-index: 100; }
+/* --- LOGIN (CENTERED & CLEAN) --- */
+#login { z-index: 100; position: relative; }
 
-.login-card {
-    background: var(--glass-bg); backdrop-filter: blur(10px);
+/* NEW CLASS NAME to prevent caching issues */
+.final-login-box {
+    background: var(--glass-bg); backdrop-filter: blur(12px);
     border: 1px solid rgba(255,255,255,0.05); border-radius: 8px;
     padding: 40px; text-align: center;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     width: 100%; max-width: 400px;
 }
+
 .brand-large { font-size: 2rem; color: var(--main-color); margin-bottom: 5px; font-weight: bold; }
 .sub-text { font-size: 0.8rem; color: var(--sub-color); letter-spacing: 1px; }
 
@@ -63,8 +62,8 @@ body {
 .input-container:focus-within { border-color: var(--main-color); }
 .input-container i { color: var(--sub-color); margin-right: 10px; }
 .input-container input {
-    background: transparent; border: none; outline: none; 
-    color: var(--text-color); font-size: 1rem; width: 100%;
+    width: 100%; background: transparent; border: none; outline: none; 
+    color: var(--text-color); font-size: 1rem;
 }
 
 .clean-btn {
@@ -98,9 +97,9 @@ body {
 }
 .dot { animation: pulse 2s infinite; }
 @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+@keyframes fadeIn { to { opacity: 1; } }
 .fade-in { animation: fadeIn 1s ease forwards; }
 .fade-in-delay { opacity: 0; animation: fadeIn 1s ease forwards 1s; }
-@keyframes fadeIn { to { opacity: 1; } }
 
 /* --- DASHBOARD --- */
 .glass-panel {
