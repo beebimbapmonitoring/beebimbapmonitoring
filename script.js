@@ -2,10 +2,10 @@
 let isLoggedIn = false;
 let currentUnit = 'C';
 let myChart = null;
-let updateInterval = null;
+let updateInterval = null; // Stores the interval ID
 let activeSensor = 'temp';
 
-// --- LOGIN LOGIC ---
+// --- LOGIN ---
 function attemptLogin() {
     const u = document.getElementById('username').value.trim();
     const p = document.getElementById('password').value.trim();
@@ -17,7 +17,7 @@ function attemptLogin() {
         document.getElementById('mainNav').classList.remove('hidden');
         navigate('home');
         
-        // Typewriter on Home
+        // Start Typewriter Effect on Home
         setTimeout(() => typeWriter("colony_status: healthy", "typewriter"), 500);
     } else {
         const err = document.getElementById('errorMsg');
@@ -26,24 +26,29 @@ function attemptLogin() {
     }
 }
 
+// SMOOTH TYPEWRITER EFFECT
 function typeWriter(text, elementId) {
     let i = 0;
-    const speed = 80;
+    const speed = 80; // Smooth speed
     const el = document.getElementById(elementId);
     el.innerHTML = "";
+    
     function type() {
         if (i < text.length) {
             el.innerHTML += text.charAt(i);
             i++;
             setTimeout(type, speed);
-        } else { el.innerHTML += '<span style="animation:pulse 1s infinite">|</span>'; }
+        } else {
+            // Remove cursor after done or keep it subtle
+            el.innerHTML += '<span style="animation:pulse 1s infinite">|</span>'; 
+        }
     }
     type();
 }
 
 function performLogout() {
     isLoggedIn = false;
-    clearInterval(updateInterval);
+    clearInterval(updateInterval); // Stop chart updates
     location.reload();
 }
 
@@ -64,52 +69,79 @@ function navigate(viewId) {
     const navLink = document.getElementById('nav-' + (viewId === 'home' || viewId === 'dashboard' ? viewId : 'settings'));
     if(navLink) navLink.classList.add('active-link');
 
-    if(viewId === 'dashboard') { initDashboard(); }
+    if(viewId === 'dashboard') {
+        initDashboard();
+    }
 }
 
-// --- DASHBOARD (SYSTEM NOT CHANGED) ---
+// --- DASHBOARD LOGIC ---
 const chartConfig = {
     temp: { label: 'Temperature', color: '#e2b714', base: 26, variance: 2 },
     humidity: { label: 'Humidity', color: '#3498db', base: 60, variance: 5 },
     weight: { label: 'Weight', color: '#2ecc71', base: 1.2, variance: 0.1 }
 };
 
+// Initial Data (15 points)
 let currentData = Array(15).fill(0).map(() => 26); 
 
 function initDashboard() {
     startClock();
     renderChart(activeSensor);
+    
+    // Stop existing loop if any
     if(updateInterval) clearInterval(updateInterval);
-    updateInterval = setInterval(updateGraphData, 1500);
+    
+    // Start Live Update Loop (Every 1.5 seconds)
+    updateInterval = setInterval(() => {
+        updateGraphData();
+    }, 1500);
 }
 
 function switchSensor(sensor, el) {
     activeSensor = sensor;
+    // Highlight Card
     document.querySelectorAll('.kpi-card').forEach(c => c.classList.remove('active'));
     el.classList.add('active');
+    
+    // Update Title & Graph Color
     document.getElementById('chartTitle').innerText = "LIVE ANALYTICS // " + chartConfig[sensor].label.toUpperCase();
+    
+    // Reset Data based on sensor type (Simulation)
     const conf = chartConfig[sensor];
     currentData = Array(15).fill(0).map(() => conf.base);
+    
     renderChart(sensor);
 }
 
 function updateGraphData() {
     if(!myChart) return;
-    const conf = chartConfig[activeSensor];
-    let newVal = conf.base + (Math.random() * conf.variance * 2 - conf.variance);
-    if(activeSensor === 'temp' && currentUnit === 'F') newVal = (newVal * 9/5) + 32;
     
+    const conf = chartConfig[activeSensor];
+    
+    // Generate logical random value
+    let newVal = conf.base + (Math.random() * conf.variance * 2 - conf.variance);
+    
+    // Fahrenheit conversion logic
+    if(activeSensor === 'temp' && currentUnit === 'F') {
+        newVal = (newVal * 9/5) + 32;
+    }
+    
+    // Update Display Number
+    let displayVal = newVal.toFixed(1);
     if(activeSensor === 'temp') document.getElementById('tempDisplay').innerText = Math.round(newVal) + "°" + currentUnit;
 
+    // SCROLLING EFFECT: Remove first, Add to end
     const dataset = myChart.data.datasets[0];
-    dataset.data.shift();
-    dataset.data.push(newVal);
-    myChart.update('none');
+    dataset.data.shift(); // Remove left-most
+    dataset.data.push(newVal); // Add right-most
+    
+    myChart.update('none'); // Update without full animation for smooth flow
 }
 
 function renderChart(type) {
     const ctx = document.getElementById('mainChart').getContext('2d');
     const conf = chartConfig[type];
+    
     if(myChart) myChart.destroy();
     
     Chart.defaults.font.family = 'Roboto Mono';
@@ -118,18 +150,29 @@ function renderChart(type) {
     myChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: Array(15).fill(''),
+            labels: Array(15).fill(''), // Hide x-labels for clean look
             datasets: [{
-                label: conf.label, data: [...currentData],
-                borderColor: conf.color, backgroundColor: conf.color + '11',
-                borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, fill: true, tension: 0.4
+                label: conf.label,
+                data: [...currentData],
+                borderColor: conf.color,
+                backgroundColor: conf.color + '11', // Very transparent fill
+                borderWidth: 2,
+                pointRadius: 0, // No points for smooth line
+                pointHoverRadius: 4,
+                fill: true,
+                tension: 0.4 // Smooth curves
             }]
         },
         options: {
-            responsive: true, maintainAspectRatio: false, animation: false,
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false, // Disable initial bounce for scrolling effect
             interaction: { intersect: false, mode: 'index' },
             plugins: { legend: { display: false } },
-            scales: { x: { grid: { display: false } }, y: { grid: { color: 'rgba(255,255,255,0.05)' } } }
+            scales: {
+                x: { grid: { display: false } },
+                y: { grid: { color: 'rgba(255,255,255,0.05)' } }
+            }
         }
     });
 }
@@ -153,4 +196,7 @@ function startClock() {
     }, 1000);
 }
 
-window.onload = () => { document.getElementById('login').style.display = 'flex'; };
+// Init
+window.onload = () => {
+    document.getElementById('login').style.display = 'flex';
+};
