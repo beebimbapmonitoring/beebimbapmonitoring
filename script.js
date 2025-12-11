@@ -1,41 +1,62 @@
-// --- STATE MANAGEMENT ---
+// --- VARIABLES ---
 let isLoggedIn = false;
 let currentUnit = 'C';
 let myChart = null;
 
-// --- 1. LOGIN SYSTEM ---
+// --- LOGIN LOGIC (Fixed to allow any input) ---
 function attemptLogin() {
-    const u = document.getElementById('username').value.trim(); // .trim() removes spaces
+    console.log("Login clicked"); // Debugging check
+    
+    // Get inputs and trim spaces
+    const u = document.getElementById('username').value.trim();
     const p = document.getElementById('password').value.trim();
 
-    // ANG BAGONG LOGIC:
-    // Check lang natin kung may laman (hindi empty string)
+    // IF NOT EMPTY (Kahit ano basta may laman)
     if(u !== "" && p !== "") {
-        
         isLoggedIn = true;
         
-        // I-set ang pangalan sa Home screen base sa tinype na username
+        // Update user display name in Home
         document.getElementById('userDisplay').innerText = u;
 
-        // Hide Login, Show Nav & Home
-        document.getElementById('login').style.display = 'none'; 
-        document.getElementById('mainNav').classList.remove('hidden'); 
-        navigate('home'); 
+        // Hide Login, Show Navigation
+        document.getElementById('login').style.display = 'none';
+        document.getElementById('mainNav').classList.remove('hidden');
         
+        // Go to Home
+        navigate('home');
     } else {
-        // Error kapag walang nilagay
+        // Show Error if empty
         const err = document.getElementById('errorMsg');
-        err.innerText = "input_required"; // Palitan ang text ng error
         err.classList.remove('hidden');
         setTimeout(() => err.classList.add('hidden'), 2000);
     }
 }
 
-// --- 2. NAVIGATION ---
+function performLogout() {
+    isLoggedIn = false;
+    document.getElementById('mainNav').classList.add('hidden');
+    
+    // Hide all views
+    document.querySelectorAll('.view').forEach(v => {
+        v.classList.remove('active-view');
+        v.style.display = 'none';
+    });
+
+    // Show Login
+    const login = document.getElementById('login');
+    login.classList.add('active-view');
+    login.style.display = 'flex'; // Flex for centering
+    
+    // Clear inputs
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+}
+
+// --- NAVIGATION ---
 function navigate(viewId) {
     if(!isLoggedIn) return;
 
-    // Hide all views
+    // Hide all
     document.querySelectorAll('.view').forEach(el => {
         el.classList.remove('active-view');
         el.style.display = 'none';
@@ -46,24 +67,23 @@ function navigate(viewId) {
     target.classList.add('active-view');
     target.style.display = 'block';
 
-    // Update Nav Active State
+    // Update Nav
     document.querySelectorAll('.nav-menu li').forEach(li => li.classList.remove('active-link'));
     const navLink = document.getElementById('nav-' + (viewId === 'home' || viewId === 'dashboard' ? viewId : 'settings'));
     if(navLink) navLink.classList.add('active-link');
 
-    // Init charts if dashboard
+    // Init Logic if Dashboard
     if(viewId === 'dashboard') {
         renderChart('temp');
         startClock();
     }
 }
 
-// --- 3. SETTINGS & THEMING ---
+// --- SETTINGS ---
 function setTheme(theme) {
-    document.body.className = ''; // Clear classes
+    document.body.className = ''; // Clear old theme
     if(theme !== 'serika') document.body.classList.add('theme-' + theme);
     
-    // UI Update
     document.querySelectorAll('.setting-options .option-btn').forEach(btn => {
         btn.classList.remove('active');
         if(btn.innerText.includes(theme)) btn.classList.add('active');
@@ -72,12 +92,9 @@ function setTheme(theme) {
 
 function setUnit(unit) {
     currentUnit = unit;
-    
-    // UI Update
     document.getElementById('btn-c').classList.toggle('active', unit === 'C');
     document.getElementById('btn-f').classList.toggle('active', unit === 'F');
 
-    // Convert Display immediately
     const baseTemp = 28;
     const val = (unit === 'C') ? baseTemp : (baseTemp * 9/5) + 32;
     document.getElementById('tempDisplay').innerText = Math.round(val) + "°" + unit;
@@ -89,7 +106,7 @@ function saveSettings() {
     setTimeout(() => msg.classList.add('hidden'), 2000);
 }
 
-// --- 4. DASHBOARD LOGIC ---
+// --- DASHBOARD CHARTS ---
 const mockData = {
     temp: { label: 'Temperature', data: [26, 27, 28, 28, 29, 28, 27] },
     humidity: { label: 'Humidity', data: [60, 62, 65, 64, 65, 63, 65] },
@@ -98,22 +115,18 @@ const mockData = {
 
 function renderChart(type) {
     const ctx = document.getElementById('mainChart').getContext('2d');
-    
-    // Get CSS Variables for Colors
     const style = getComputedStyle(document.body);
     const mainColor = style.getPropertyValue('--main-color').trim();
     const subColor = style.getPropertyValue('--sub-color').trim();
 
-    // Data Conversion for Unit
-    let dataPoints = [...mockData[type].data]; // Copy array
+    let dataPoints = [...mockData[type].data];
     if(type === 'temp' && currentUnit === 'F') {
         dataPoints = dataPoints.map(t => (t * 9/5) + 32);
     }
 
     if(myChart) myChart.destroy();
-
     Chart.defaults.font.family = 'Roboto Mono';
-    
+
     myChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -141,27 +154,22 @@ function renderChart(type) {
 }
 
 function showGraph(type, el) {
-    // UI toggle
     document.querySelectorAll('.kpi-card').forEach(c => c.classList.remove('active-card'));
     el.classList.add('active-card');
-    
     document.querySelector('.chart-container-responsive canvas').style.display = 'block';
     document.getElementById('videoContainer').style.display = 'none';
     document.getElementById('contentTitle').innerText = mockData[type].label + " Analytics";
-    
     renderChart(type);
 }
 
 function showVideoPanel(el) {
     document.querySelectorAll('.kpi-card').forEach(c => c.classList.remove('active-card'));
     el.classList.add('active-card');
-
     document.querySelector('.chart-container-responsive canvas').style.display = 'none';
     document.getElementById('videoContainer').style.display = 'block';
     document.getElementById('contentTitle').innerText = "Live Hive Entrance";
 }
 
-// Clock
 function startClock() {
     const update = () => {
         const now = new Date();
@@ -173,12 +181,7 @@ function startClock() {
     update();
 }
 
-// Init
+// Ensure Login shows on load
 window.onload = () => {
-    // Force Login View
-    document.getElementById('login').style.display = 'flex';
-};
-window.onload = () => {
-    // Force Login View on Load
     document.getElementById('login').style.display = 'flex';
 };
