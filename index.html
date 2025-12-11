@@ -3,17 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>juBEES | Stingless Bee Monitor</title>
-    
+    <title>juBEES | Monitor System</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <div class="bg-layer"></div>
 
     <section id="login" class="view active-view center-screen">
         <div class="login-glass">
@@ -31,7 +27,7 @@
                 </div>
                 <br>
                 <div class="actions">
-                    <button type="button" class="primary-btn" onclick="attemptLogin()">> login_system</button>
+                    <button type="submit" class="primary-btn">> login_system</button>
                 </div>
                 <p id="errorMsg" class="error-text hidden">please_fill_all_fields</p>
             </form>
@@ -73,3 +69,79 @@
                     <div class="status-item"><i class="fas fa-clock"></i> <span id="clock">12:00</span></div>
                 </div>
             </header>
+
+            <div class="kpi-grid">
+                <div class="kpi-card active-card" onclick="showGraph('temp', this)">
+                    <div class="icon-box"><i class="fas fa-temperature-low"></i></div>
+                    <div class="kpi-data"><span class="kpi-label">Temp</span><h3 id="tempDisplay">28°C</h3></div>
+                    <div class="kpi-indicator good"></div>
+                </div>
+                <div class="kpi-card" onclick="showGraph('humidity', this)">
+                    <div class="icon-box"><i class="fas fa-tint"></i></div>
+                    <div class="kpi-data"><span class="kpi-label">Humidity</span><h3>65%</h3></div>
+                    <div class="kpi-indicator normal"></div>
+                </div>
+                <div class="kpi-card" onclick="showGraph('weight', this)">
+                    <div class="icon-box"><i class="fas fa-weight-hanging"></i></div>
+                    <div class="kpi-data"><span class="kpi-label">Weight</span><h3>1.2kg</h3></div>
+                    <div class="kpi-indicator good"></div>
+                </div>
+                <div class="kpi-card" onclick="showVideoPanel(this)">
+                    <div class="icon-box"><i class="fas fa-video"></i></div>
+                    <div class="kpi-data"><span class="kpi-label">Camera</span><h3>LIVE</h3></div>
+                    <div class="kpi-indicator alert"></div>
+                </div>
+            </div>
+
+            <div class="main-content-split">
+                <div class="visualizer-box">
+                    <div class="box-header">
+                        <h4 id="contentTitle">Temperature Analytics</h4>
+                        <button class="mini-btn" onclick="alert('Exporting data...')"><i class="fas fa-download"></i> .CSV</button>
+                    </div>
+                    <div class="chart-container-responsive">
+                        <canvas id="mainChart"></canvas>
+                        <div id="videoContainer" style="display:none; width:100%; height:100%;">
+                            <div class="video-placeholder"><i class="fas fa-play-circle fa-3x"></i><p>Live Stream Active</p></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="log-box">
+                    <div class="box-header"><h4>Events Log</h4></div>
+                    <ul class="log-list">
+                        <li class="log-item"><span class="time">14:05</span> <span class="msg">Motion detected</span></li>
+                        <li class="log-item warning"><span class="time">10:15</span> <span class="msg">Vibration detected</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="settings" class="view">
+        <div class="dash-glass-panel settings-panel">
+            <h1>preferences</h1>
+            <br>
+            <div class="setting-row">
+                <div class="setting-label">theme</div>
+                <div class="setting-options">
+                    <button class="option-btn active" onclick="setTheme('serika')">serika</button>
+                    <button class="option-btn" onclick="setTheme('carbon')">carbon</button>
+                    <button class="option-btn" onclick="setTheme('honey')">honey</button>
+                </div>
+            </div>
+            <div class="setting-row">
+                <div class="setting-label">units</div>
+                <div class="setting-options">
+                    <button class="option-btn active" id="btn-c" onclick="setUnit('C')">°C</button>
+                    <button class="option-btn" id="btn-f" onclick="setUnit('F')">°F</button>
+                </div>
+            </div>
+            <br>
+            <button class="primary-btn" onclick="saveSettings()">> save_changes</button>
+            <p id="saveMsg" class="success-text hidden">settings_saved</p>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>
