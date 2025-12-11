@@ -1,23 +1,19 @@
-// --- STATE VARIABLES ---
+// --- STATE MANAGEMENT ---
 let isLoggedIn = false;
-let currentUnit = 'C'; // C or F
-let currentTheme = 'serika'; // serika, carbon, honey
+let currentUnit = 'C';
 let myChart = null;
 
 // --- 1. LOGIN SYSTEM ---
 function attemptLogin() {
-    const user = document.getElementById('username').value;
-    const pass = document.getElementById('password').value;
+    const u = document.getElementById('username').value;
+    const p = document.getElementById('password').value;
 
-    // Fake authentication (Simulated)
-    if(user === 'admin' && pass === '1234') {
+    // Hardcoded credentials for demo
+    if(u === 'admin' && p === '1234') {
         isLoggedIn = true;
-        document.getElementById('userDisplay').innerText = user;
-        
-        // Hide Login, Show Home & Nav
-        document.getElementById('login').style.display = 'none';
-        document.getElementById('mainNav').classList.remove('hidden');
-        navigate('home');
+        document.getElementById('login').style.display = 'none'; // Hide login
+        document.getElementById('mainNav').classList.remove('hidden'); // Show nav
+        navigate('home'); // Go to home
     } else {
         const err = document.getElementById('errorMsg');
         err.classList.remove('hidden');
@@ -28,120 +24,115 @@ function attemptLogin() {
 function performLogout() {
     isLoggedIn = false;
     document.getElementById('mainNav').classList.add('hidden');
-    
     // Hide all views
-    document.querySelectorAll('.view').forEach(v => {
-        v.classList.remove('active-view');
-        v.style.display = 'none';
-    });
-
-    // Show Login
-    const loginPage = document.getElementById('login');
-    loginPage.classList.add('active-view');
-    loginPage.style.display = 'flex'; // Flex for center alignment
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
+    document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
     
-    // Clear inputs
+    // Show login
+    const login = document.getElementById('login');
+    login.style.display = 'flex';
+    login.classList.add('active-view');
+    
+    // Clear fields
     document.getElementById('username').value = '';
     document.getElementById('password').value = '';
 }
 
 // --- 2. NAVIGATION ---
 function navigate(viewId) {
-    if(!isLoggedIn) return; // Prevent navigation if not logged in
+    if(!isLoggedIn) return;
 
-    // Hide all
+    // Hide all views
     document.querySelectorAll('.view').forEach(el => {
         el.classList.remove('active-view');
         el.style.display = 'none';
     });
 
-    // Show Selected
-    const selected = document.getElementById(viewId);
-    selected.classList.add('active-view');
-    
-    if (viewId === 'dashboard') {
-        selected.style.display = (window.innerWidth > 768) ? 'grid' : 'flex';
-        renderChart(); // Refresh chart to match colors
-    } else {
-        selected.style.display = 'block';
-    }
+    // Show selected
+    const target = document.getElementById(viewId);
+    target.classList.add('active-view');
+    target.style.display = 'block';
 
-    // Update Nav Link Colors
+    // Update Nav Active State
     document.querySelectorAll('.nav-menu li').forEach(li => li.classList.remove('active-link'));
-    const navItem = document.getElementById('nav-' + (viewId === 'home' || viewId === 'dashboard' ? viewId : 'settings'));
-    if(navItem) navItem.classList.add('active-link');
+    const navLink = document.getElementById('nav-' + (viewId === 'home' || viewId === 'dashboard' ? viewId : 'settings'));
+    if(navLink) navLink.classList.add('active-link');
+
+    // Init charts if dashboard
+    if(viewId === 'dashboard') {
+        renderChart('temp');
+        startClock();
+    }
 }
 
-// --- 3. SETTINGS & PERSONALIZATION ---
-
-// Change Theme
-function setTheme(themeName) {
-    currentTheme = themeName;
-    document.body.className = ''; // Reset classes
-    if(themeName !== 'serika') {
-        document.body.classList.add('theme-' + themeName);
-    }
-
-    // Update Buttons UI
+// --- 3. SETTINGS & THEMING ---
+function setTheme(theme) {
+    document.body.className = ''; // Clear classes
+    if(theme !== 'serika') document.body.classList.add('theme-' + theme);
+    
+    // UI Update
     document.querySelectorAll('.setting-options .option-btn').forEach(btn => {
         btn.classList.remove('active');
-        if(btn.innerText.includes(themeName)) btn.classList.add('active');
+        if(btn.innerText.includes(theme)) btn.classList.add('active');
     });
 }
 
-// Change Unit
 function setUnit(unit) {
     currentUnit = unit;
     
-    // Update UI Buttons
+    // UI Update
     document.getElementById('btn-c').classList.toggle('active', unit === 'C');
     document.getElementById('btn-f').classList.toggle('active', unit === 'F');
 
-    // Update Dashboard Value immediately (Simulation)
+    // Convert Display immediately
     const baseTemp = 28;
-    const displayTemp = (unit === 'C') ? baseTemp : (baseTemp * 9/5) + 32;
-    document.getElementById('tempDisplay').innerText = displayTemp + "°" + unit;
+    const val = (unit === 'C') ? baseTemp : (baseTemp * 9/5) + 32;
+    document.getElementById('tempDisplay').innerText = Math.round(val) + "°" + unit;
 }
 
-// Save Animation
 function saveSettings() {
     const msg = document.getElementById('saveMsg');
     msg.classList.remove('hidden');
     setTimeout(() => msg.classList.add('hidden'), 2000);
 }
 
-// --- 4. DASHBOARD CHART ---
-function renderChart() {
+// --- 4. DASHBOARD LOGIC ---
+const mockData = {
+    temp: { label: 'Temperature', data: [26, 27, 28, 28, 29, 28, 27] },
+    humidity: { label: 'Humidity', data: [60, 62, 65, 64, 65, 63, 65] },
+    weight: { label: 'Weight (kg)', data: [1.1, 1.1, 1.2, 1.2, 1.2, 1.2, 1.2] }
+};
+
+function renderChart(type) {
     const ctx = document.getElementById('mainChart').getContext('2d');
     
-    // Get colors from CSS variables to match theme
+    // Get CSS Variables for Colors
     const style = getComputedStyle(document.body);
     const mainColor = style.getPropertyValue('--main-color').trim();
     const subColor = style.getPropertyValue('--sub-color').trim();
 
-    // Destroy old chart if exists
-    if (myChart) myChart.destroy();
-
-    // Convert data based on unit
-    let rawData = [27, 28, 29, 28, 30, 28, 27];
-    if (currentUnit === 'F') {
-        rawData = rawData.map(c => (c * 9/5) + 32);
+    // Data Conversion for Unit
+    let dataPoints = [...mockData[type].data]; // Copy array
+    if(type === 'temp' && currentUnit === 'F') {
+        dataPoints = dataPoints.map(t => (t * 9/5) + 32);
     }
+
+    if(myChart) myChart.destroy();
 
     Chart.defaults.font.family = 'Roboto Mono';
     
     myChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', 'now'],
+            labels: ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', 'Now'],
             datasets: [{
-                label: 'Temperature',
-                data: rawData,
+                label: mockData[type].label,
+                data: dataPoints,
                 borderColor: mainColor,
                 backgroundColor: mainColor,
                 borderWidth: 2,
                 tension: 0.4,
-                pointRadius: 4
+                pointRadius: 3
             }]
         },
         options: {
@@ -150,26 +141,50 @@ function renderChart() {
             plugins: { legend: { display: false } },
             scales: {
                 x: { ticks: { color: subColor }, grid: { display: false } },
-                y: { ticks: { color: subColor }, grid: { color: subColor + '33' } } // Transparent grid
+                y: { ticks: { color: subColor }, grid: { color: subColor + '22' } }
             }
         }
     });
 }
 
-function showGraph(type) {
-    document.querySelector('.chart-wrapper').style.display = 'block';
+function showGraph(type, el) {
+    // UI toggle
+    document.querySelectorAll('.kpi-card').forEach(c => c.classList.remove('active-card'));
+    el.classList.add('active-card');
+    
+    document.querySelector('.chart-container-responsive canvas').style.display = 'block';
     document.getElementById('videoContainer').style.display = 'none';
-    document.getElementById('contentTitle').innerText = type + "_history";
-    renderChart();
+    document.getElementById('contentTitle').innerText = mockData[type].label + " Analytics";
+    
+    renderChart(type);
 }
 
-function showVideoPanel() {
-    document.querySelector('.chart-wrapper').style.display = 'none';
+function showVideoPanel(el) {
+    document.querySelectorAll('.kpi-card').forEach(c => c.classList.remove('active-card'));
+    el.classList.add('active-card');
+
+    document.querySelector('.chart-container-responsive canvas').style.display = 'none';
     document.getElementById('videoContainer').style.display = 'block';
-    document.getElementById('contentTitle').innerText = "live_entrance_cam";
+    document.getElementById('contentTitle').innerText = "Live Hive Entrance";
 }
 
-// Init (Start at Login)
+// Clock
+function startClock() {
+    const update = () => {
+        const now = new Date();
+        const t = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0');
+        const el = document.getElementById('clock');
+        if(el) el.innerText = t;
+    };
+    setInterval(update, 1000);
+    update();
+}
+
+// Init
+window.onload = () => {
+    // Force Login View
+    document.getElementById('login').style.display = 'flex';
+};
 window.onload = () => {
     // Force Login View on Load
     document.getElementById('login').style.display = 'flex';
