@@ -1,121 +1,65 @@
-// Global variable para sa Chart instance
+// script.js
+
 let myChart = null;
 
-// Dummy Data para sa Simulation (kunwari galing sa database)
 const mockData = {
-    temp: {
-        label: 'Temperature History (°C)',
-        data: [21, 22, 23, 22, 24, 22, 21],
-        color: '#ffcd56' // Yellow-ish
-    },
-    humidity: {
-        label: 'Humidity History (%)',
-        data: [50, 52, 55, 53, 55, 54, 55],
-        color: '#36a2eb' // Blue
-    },
-    weight: {
-        label: 'Hive Weight (kg)',
-        data: [15.5, 15.8, 16.0, 16.0, 15.9, 16.1, 16.0],
-        color: '#4bc0c0' // Teal
-    },
-    audio: {
-        label: 'Audio Decibels (dB)',
-        data: [40, 42, 45, 41, 39, 42, 40],
-        color: '#ff9f40' // Orange
-    }
+    temp: { label: 'Temperature (°C)', data: [22, 23, 21, 24, 25, 23], color: '#f39c12' },
+    humidity: { label: 'Humidity (%)', data: [50, 55, 60, 58, 55, 52], color: '#3498db' },
+    weight: { label: 'Weight (kg)', data: [15, 15.2, 15.5, 15.4, 15.8, 16], color: '#2ecc71' }
 };
 
-// Function: Ipakita ang Graph base sa pinindot na card
-function showGraph(sensorType) {
-    // 1. Ipakita ang chart container, itago ang video
-    document.getElementById('detailsSection').style.display = 'block';
-    document.getElementById('videoSection').style.display = 'none';
+function showGraph(type) {
+    const section = document.getElementById('detailsSection');
+    const videoSec = document.getElementById('videoSection');
     const canvas = document.getElementById('detailChart');
+    const title = document.getElementById('panelTitle');
+
+    section.style.display = 'block';
+    videoSec.style.display = 'none';
     canvas.style.display = 'block';
 
-    // 2. Sirain ang lumang chart kung meron man (para hindi magpatong-patong)
-    if (myChart) {
-        myChart.destroy();
-    }
+    title.innerText = type.charAt(0).toUpperCase() + type.slice(1) + " History";
 
-    // 3. Kunin ang data base sa sensorType (temp, humidity, etc.)
-    const dataset = mockData[sensorType];
+    if (myChart) myChart.destroy();
 
-    // 4. Gumawa ng bagong Chart
     const ctx = canvas.getContext('2d');
     myChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', 'Now'],
+            labels: ['10am', '11am', '12pm', '1pm', '2pm', 'Now'],
             datasets: [{
-                label: dataset.label,
-                data: dataset.data,
-                borderColor: dataset.color,
-                backgroundColor: dataset.color + '33', // Add transparency
+                label: mockData[type].label,
+                data: mockData[type].data,
+                borderColor: mockData[type].color,
+                backgroundColor: mockData[type].color + '20',
                 fill: true,
-                tension: 0.4 // Smooth curves
+                tension: 0.4
             }]
         },
-        options: {
-            responsive: true,
-            scales: {
-                y: { beginAtZero: false }
-            }
-        }
+        options: { responsive: true }
     });
 
-    // Scroll to details section smoothly
-    document.getElementById('detailsSection').scrollIntoView({ behavior: 'smooth' });
+    section.scrollIntoView({ behavior: 'smooth' });
 }
 
-// Function: Ipakita ang Video Panel
 function showVideoPanel() {
-    document.getElementById('detailsSection').style.display = 'block';
-    document.getElementById('detailChart').style.display = 'none'; // Itago ang chart
-    document.getElementById('videoSection').style.display = 'block'; // Ipakita ang video
+    const section = document.getElementById('detailsSection');
+    const videoSec = document.getElementById('videoSection');
+    const canvas = document.getElementById('detailChart');
+    const title = document.getElementById('panelTitle');
 
-    // Populate fake logs
-    const logList = document.getElementById('videoLogs');
-    logList.innerHTML = `
-        <li>✅ 14:05 - Motion Detected (Worker Bees)</li>
-        <li>✅ 12:30 - Beekeeper Maintenance</li>
-        <li>⚠️ 09:15 - Unknown Object Detected</li>
-    `;
+    section.style.display = 'block';
+    canvas.style.display = 'none';
+    videoSec.style.display = 'block';
+    title.innerText = "Live Camera Feed";
 
-    document.getElementById('detailsSection').scrollIntoView({ behavior: 'smooth' });
+    section.scrollIntoView({ behavior: 'smooth' });
 }
 
-// Function: Mock Live Stream
-function startLiveStream() {
-    alert("📡 Connecting to live camera feed... (This is a simulation)");
-    const video = document.getElementById('videoClip');
-    video.play();
+function closePanel() {
+    document.getElementById('detailsSection').style.display = 'none';
 }
 
-// Function: Download CSV Logs
 function downloadLogs() {
-    const rows = [
-        ["Timestamp", "Sensor", "Value", "Status"],
-        ["2025-01-01 10:00", "Temp", "22C", "Normal"],
-        ["2025-01-01 10:00", "Humidity", "55%", "Normal"],
-        ["2025-01-01 10:00", "Weight", "16kg", "Stable"]
-    ];
-
-    let csvContent = "data:text/csv;charset=utf-8," 
-        + rows.map(e => e.join(",")).join("\n");
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "juBEES_logs.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    alert("Downloading CSV Logs...");
 }
-
-// (Optional) Auto-update dashboard numbers randomizer para mukhang live
-setInterval(() => {
-    // Randomize Temp slightly
-    const currentTemp = 21 + Math.floor(Math.random() * 3);
-    document.getElementById('temp').innerText = currentTemp + " °C";
-}, 3000); // Updates every 3 seconds
