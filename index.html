@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>juBEES | Meliponini System</title>
+    <title>juBEES | Smart Monitor</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -14,54 +14,23 @@
     <div class="bg-layer"></div>
 
     <section id="login" class="view active-view center-screen">
-        <div class="bts-split-card">
-            
-            <div class="card-left">
-                <p class="sub-label">system_init :: v6.0</p>
-                <div class="brand-hero">
-                    <h1>juBEES<span class="highlight">_MONITOR</span></h1>
-                    <p>smart_apiary_solutions</p>
+        <div class="glass-card login-card">
+            <div class="brand-large"><i class="fas fa-bug"></i> juBEES</div>
+            <p class="sub-text">meliponini_monitoring_system</p>
+            <br>
+            <form onsubmit="event.preventDefault(); attemptLogin();">
+                <div class="input-container">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="username" placeholder="username" autocomplete="off">
                 </div>
-                
-                <div class="status-list-container">
-                    <p class="list-header">> system_check:</p>
-                    <ul class="status-list">
-                        <li><span class="cmd">sensor_array</span> [ONLINE]</li>
-                        <li><span class="cmd">camera_feed</span> [STANDBY]</li>
-                        <li><span class="cmd">database</span> [CONNECTED]</li>
-                    </ul>
+                <div class="input-container">
+                    <i class="fas fa-key"></i>
+                    <input type="password" id="password" placeholder="password">
                 </div>
-            </div>
-
-            <div class="card-right">
-                <div class="login-header">
-                    <h2>admin_access</h2>
-                    <p>please_identify_yourself</p>
-                </div>
-
-                <form onsubmit="event.preventDefault(); attemptLogin();">
-                    <div class="input-group">
-                        <span class="prefix">usr_</span>
-                        <input type="text" id="username" placeholder="username" autocomplete="off">
-                    </div>
-                    <div class="input-group">
-                        <span class="prefix">pwd_</span>
-                        <input type="password" id="password" placeholder="password">
-                    </div>
-
-                    <div class="terms-box">
-                        <label><input type="checkbox" checked> <span>secure_connection</span></label>
-                    </div>
-
-                    <button type="submit" class="btn-main">> initialize_login</button>
-                </form>
-
-                <div class="extra-links">
-                    <span>forgot_password?</span>
-                    <span class="highlight">contact_support()</span>
-                </div>
-                <p id="errorMsg" class="error-text hidden">err: fields_cannot_be_empty</p>
-            </div>
+                <br>
+                <button type="submit" class="clean-btn">> login</button>
+            </form>
+            <p id="errorMsg" class="error-text hidden">please_fill_all_fields</p>
         </div>
     </section>
 
@@ -77,8 +46,14 @@
 
     <section id="home" class="view center-screen">
         <div class="home-content">
-            <p class="fade-in">access_granted :: <span id="userDisplay" class="highlight">admin</span></p>
-            <h1 id="typewriter" class="hero-title"></h1> <div class="status-badge fade-in-delay"><span class="dot">●</span> SYSTEM_OPTIMAL</div>
+            <p class="fade-in">welcome_back :: <span id="userDisplay" class="highlight">admin</span></p>
+            
+            <h1 id="typewriter" class="hero-title"></h1>
+            
+            <div class="status-badge fade-in-delay">
+                <span class="dot">●</span> SYSTEM_OPTIMAL
+            </div>
+            
             <br><br>
             <div class="fade-in-delay">
                 <button class="clean-btn outline" onclick="navigate('dashboard')">./launch_dashboard</button>
@@ -90,7 +65,8 @@
         <div class="glass-panel">
             <header class="dash-header">
                 <div class="hive-info">
-                    <h2>HIVE_04</h2> <span class="tag">Tetragonula biroi</span>
+                    <h2>HIVE_04</h2>
+                    <span class="tag">Tetragonula biroi</span>
                 </div>
                 <div class="sys-info">
                     <span><i class="fas fa-wifi"></i> CONNECTED</span>
@@ -102,21 +78,31 @@
             <div class="kpi-grid">
                 <div class="kpi-card active" onclick="switchSensor('temp', this)">
                     <div class="icon"><i class="fas fa-temperature-low"></i></div>
-                    <div><small>TEMPERATURE</small><h3 id="tempDisplay">--</h3></div>
+                    <div>
+                        <small>TEMPERATURE</small>
+                        <h3 id="tempDisplay">--</h3>
+                    </div>
                 </div>
                 <div class="kpi-card" onclick="switchSensor('humidity', this)">
                     <div class="icon"><i class="fas fa-tint"></i></div>
-                    <div><small>HUMIDITY</small><h3>65%</h3></div>
+                    <div>
+                        <small>HUMIDITY</small>
+                        <h3>65%</h3>
+                    </div>
                 </div>
                 <div class="kpi-card" onclick="switchSensor('weight', this)">
                     <div class="icon"><i class="fas fa-weight-hanging"></i></div>
-                    <div><small>WEIGHT</small><h3>1.2kg</h3></div>
+                    <div>
+                        <small>WEIGHT</small>
+                        <h3>1.2kg</h3>
+                    </div>
                 </div>
             </div>
 
             <div class="chart-section">
                 <div class="chart-header">
-                    <h4 id="chartTitle">LIVE ANALYTICS // TEMP</h4> <span class="live-dot">● LIVE</span>
+                    <h4 id="chartTitle">LIVE ANALYTICS // TEMP</h4>
+                    <span class="live-dot">● LIVE</span>
                 </div>
                 <div class="chart-wrapper">
                     <canvas id="mainChart"></canvas>
@@ -135,7 +121,8 @@
 
     <section id="settings" class="view">
         <div class="glass-card settings-card">
-            <h1>PREFERENCES</h1><br>
+            <h1>PREFERENCES</h1>
+            <br>
             <div class="setting-group">
                 <label>THEME</label>
                 <div class="btn-row">
