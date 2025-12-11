@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>juBEES | Monitor System</title>
+    <title>juBEES | Smart Monitor</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -11,137 +11,116 @@
 </head>
 <body>
 
+    <div class="bg-layer"></div>
+
     <section id="login" class="view active-view center-screen">
-        <div class="login-glass">
+        <div class="glass-card login-card">
             <div class="brand-large"><i class="fas fa-bug"></i> juBEES</div>
-            <p class="sub-text">stingless_bee_system_v5</p>
+            <p class="sub-text">meliponini_monitoring_system</p>
             <br>
             <form onsubmit="event.preventDefault(); attemptLogin();">
-                <div class="input-group">
+                <div class="input-container">
                     <i class="fas fa-user"></i>
-                    <input type="text" id="username" placeholder="enter_username" autocomplete="off">
+                    <input type="text" id="username" placeholder="username" autocomplete="off">
                 </div>
-                <div class="input-group">
+                <div class="input-container">
                     <i class="fas fa-key"></i>
-                    <input type="password" id="password" placeholder="enter_password">
+                    <input type="password" id="password" placeholder="password">
                 </div>
                 <br>
-                <div class="actions">
-                    <button type="submit" class="primary-btn">> login_system</button>
-                </div>
-                <p id="errorMsg" class="error-text hidden">please_fill_all_fields</p>
+                <button type="submit" class="clean-btn">> login</button>
             </form>
+            <p id="errorMsg" class="error-text hidden">please_fill_all_fields</p>
         </div>
     </section>
 
     <nav class="navbar hidden" id="mainNav">
-        <div class="brand">juBEES</div>
+        <div class="brand-small">juBEES</div>
         <ul class="nav-menu">
             <li onclick="navigate('home')" id="nav-home">home</li>
             <li onclick="navigate('dashboard')" id="nav-dash">monitor</li>
             <li onclick="navigate('settings')" id="nav-settings">settings</li>
-            <li onclick="performLogout()" style="color: var(--error-color);">logout</li>
+            <li onclick="performLogout()" class="logout-link">logout</li>
         </ul>
     </nav>
 
-    <section id="home" class="view">
-        <div class="hero-container">
-            <span class="sub-text">access_granted: <span id="userDisplay" class="highlight">admin</span></span>
-            <h1>colony_status: <span style="color:var(--success-color)">healthy</span><span class="cursor">|</span></h1>
-            <p>connected to apiary network. monitoring Tetragonula biroi hives.</p>
-            <br>
-            <div class="command-line">
-                <span class="prompt">$</span> <button class="link-btn" onclick="navigate('dashboard')">./launch_dashboard.sh</button>
+    <section id="home" class="view center-screen">
+        <div class="home-content">
+            <p class="fade-in">welcome_back :: <span id="userDisplay" class="highlight">admin</span></p>
+            
+            <h1 id="typewriter" class="hero-title"></h1>
+            
+            <div class="status-badge fade-in-delay">
+                <span class="dot">●</span> SYSTEM_OPTIMAL
+            </div>
+            
+            <br><br>
+            <div class="fade-in-delay">
+                <button class="clean-btn outline" onclick="navigate('dashboard')">./launch_dashboard</button>
             </div>
         </div>
     </section>
 
     <section id="dashboard" class="view">
-        <div class="dash-glass-panel">
+        <div class="glass-panel">
             <header class="dash-header">
-                <div class="hive-identity">
-                    <h2><i class="fas fa-archive"></i> HIVE_04</h2>
-                    <span class="species-badge">Meliponini</span>
+                <div class="hive-info">
+                    <h2>HIVE_04</h2>
+                    <span class="tag">Tetragonula biroi</span>
                 </div>
-                <div class="system-status">
-                    <div class="status-item"><i class="fas fa-wifi"></i> <span>Connected</span></div>
-                    <div class="status-item"><i class="fas fa-battery-three-quarters"></i> <span>92%</span></div>
-                    <div class="status-item"><i class="fas fa-clock"></i> <span id="clock">12:00</span></div>
+                <div class="sys-info">
+                    <span><i class="fas fa-wifi"></i> CONNECTED</span>
+                    <span><i class="fas fa-battery-full"></i> 98%</span>
+                    <span id="clock">12:00</span>
                 </div>
             </header>
 
             <div class="kpi-grid">
-                <div class="kpi-card active-card" onclick="showGraph('temp', this)">
-                    <div class="icon-box"><i class="fas fa-temperature-low"></i></div>
-                    <div class="kpi-data"><span class="kpi-label">Temp</span><h3 id="tempDisplay">28°C</h3></div>
-                    <div class="kpi-indicator good"></div>
+                <div class="kpi-card active" onclick="switchSensor('temp', this)">
+                    <div class="icon"><i class="fas fa-temperature-low"></i></div>
+                    <div>
+                        <small>TEMPERATURE</small>
+                        <h3 id="tempDisplay">--</h3>
+                    </div>
                 </div>
-                <div class="kpi-card" onclick="showGraph('humidity', this)">
-                    <div class="icon-box"><i class="fas fa-tint"></i></div>
-                    <div class="kpi-data"><span class="kpi-label">Humidity</span><h3>65%</h3></div>
-                    <div class="kpi-indicator normal"></div>
+                <div class="kpi-card" onclick="switchSensor('humidity', this)">
+                    <div class="icon"><i class="fas fa-tint"></i></div>
+                    <div>
+                        <small>HUMIDITY</small>
+                        <h3>65%</h3>
+                    </div>
                 </div>
-                <div class="kpi-card" onclick="showGraph('weight', this)">
-                    <div class="icon-box"><i class="fas fa-weight-hanging"></i></div>
-                    <div class="kpi-data"><span class="kpi-label">Weight</span><h3>1.2kg</h3></div>
-                    <div class="kpi-indicator good"></div>
-                </div>
-                <div class="kpi-card" onclick="showVideoPanel(this)">
-                    <div class="icon-box"><i class="fas fa-video"></i></div>
-                    <div class="kpi-data"><span class="kpi-label">Camera</span><h3>LIVE</h3></div>
-                    <div class="kpi-indicator alert"></div>
+                <div class="kpi-card" onclick="switchSensor('weight', this)">
+                    <div class="icon"><i class="fas fa-weight-hanging"></i></div>
+                    <div>
+                        <small>WEIGHT</small>
+                        <h3>1.2kg</h3>
+                    </div>
                 </div>
             </div>
 
-            <div class="main-content-split">
-                <div class="visualizer-box">
-                    <div class="box-header">
-                        <h4 id="contentTitle">Temperature Analytics</h4>
-                        <button class="mini-btn" onclick="alert('Exporting data...')"><i class="fas fa-download"></i> .CSV</button>
-                    </div>
-                    <div class="chart-container-responsive">
-                        <canvas id="mainChart"></canvas>
-                        <div id="videoContainer" style="display:none; width:100%; height:100%;">
-                            <div class="video-placeholder"><i class="fas fa-play-circle fa-3x"></i><p>Live Stream Active</p></div>
-                        </div>
-                    </div>
+            <div class="chart-section">
+                <div class="chart-header">
+                    <h4 id="chartTitle">LIVE ANALYTICS // TEMP</h4>
+                    <span class="live-dot">● LIVE</span>
                 </div>
-                <div class="log-box">
-                    <div class="box-header"><h4>Events Log</h4></div>
-                    <ul class="log-list">
-                        <li class="log-item"><span class="time">14:05</span> <span class="msg">Motion detected</span></li>
-                        <li class="log-item warning"><span class="time">10:15</span> <span class="msg">Vibration detected</span></li>
-                    </ul>
+                <div class="chart-wrapper">
+                    <canvas id="mainChart"></canvas>
                 </div>
+            </div>
+
+            <div class="logs-section">
+                <h4>EVENT_LOGS</h4>
+                <ul id="logStream">
+                    <li><span class="time">14:05</span> Motion detected at entrance</li>
+                    <li><span class="time">14:00</span> Data synchronized with cloud</li>
+                </ul>
             </div>
         </div>
     </section>
 
     <section id="settings" class="view">
-        <div class="dash-glass-panel settings-panel">
-            <h1>preferences</h1>
+        <div class="glass-card settings-card">
+            <h1>PREFERENCES</h1>
             <br>
-            <div class="setting-row">
-                <div class="setting-label">theme</div>
-                <div class="setting-options">
-                    <button class="option-btn active" onclick="setTheme('serika')">serika</button>
-                    <button class="option-btn" onclick="setTheme('carbon')">carbon</button>
-                    <button class="option-btn" onclick="setTheme('honey')">honey</button>
-                </div>
-            </div>
-            <div class="setting-row">
-                <div class="setting-label">units</div>
-                <div class="setting-options">
-                    <button class="option-btn active" id="btn-c" onclick="setUnit('C')">°C</button>
-                    <button class="option-btn" id="btn-f" onclick="setUnit('F')">°F</button>
-                </div>
-            </div>
-            <br>
-            <button class="primary-btn" onclick="saveSettings()">> save_changes</button>
-            <p id="saveMsg" class="success-text hidden">settings_saved</p>
-        </div>
-    </section>
-
-    <script src="script.js"></script>
-</body>
-</html>
+            <div class="setting-group">
